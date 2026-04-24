@@ -437,7 +437,7 @@
 </div>
 
 <script>
-const API_URL = "http://194.226.169.15:8765/create";
+const API_URL = "/api/create";
 const API_SECRET = "vpn-secret-2024";
 let lastConfig = null;
 let lastName = null;
@@ -458,7 +458,7 @@ async function getConfig() {
   try {
     const resp = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Secret": API_SECRET },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name })
     });
     const data = await resp.json();
