@@ -194,6 +194,7 @@ function renderUsers(users) {
 
 function askDelete(idx) {
   const u = window._users[idx];
+  console.log("askDelete user=", u);
   pendingPubkey = u.pubkey;
   document.getElementById("modalText").textContent = `«${u.name || "Пользователь"}» потеряет доступ к VPN.`;
   document.getElementById("modalBg").classList.add("show");
