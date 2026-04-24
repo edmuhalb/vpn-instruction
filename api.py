@@ -242,38 +242,44 @@ class Handler(BaseHTTPRequestHandler):
         # Remove peer from live WireGuard
         subprocess.run(["docker", "exec", CONTAINER, "awg", "set", "awg0", "peer", pubkey, "remove"])
 
-        # Remove peer block from config file
+        # Remove peer block from config file using awk
+        # Removes the [Peer] block that contains the target pubkey
+        awk_script = f"""
+BEGIN {{ skip=0; buf="" }}
+/^\[Peer\]/ {{
+    if (buf != "") print buf
+    buf = $0
+    skip = 0
+    next
+}}
+/PublicKey/ && $0 ~ /{re.escape(pubkey)}/ {{ skip = 1; buf = ""; next }}
+{{
+    if (!skip) buf = buf "\n" $0
+    else if (/^\[/ && !/^\[Peer\]/) {{ skip = 0; print buf; buf = $0 }}
+}}
+END {{ if (!skip && buf != "") print buf }}
+"""
         conf = docker_exec(["cat", CONF_PATH])
-        lines = conf.splitlines()
-        new_lines = []
-        skip = False
-        for line in lines:
-            if line.strip() == "[Peer]":
-                # Look ahead to check if this peer has our pubkey
-                skip = False
-                new_lines.append(("PEER_MARKER", []))
-            elif skip:
-                continue
-            elif line.strip().startswith("PublicKey") and pubkey in line:
-                # Remove last PEER_MARKER block
-                for i in range(len(new_lines)-1, -1, -1):
-                    if new_lines[i] == ("PEER_MARKER", []):
-                        new_lines = new_lines[:i]
-                        break
-                skip = True
-            else:
-                if new_lines and isinstance(new_lines[-1], tuple):
-                    peer_marker = new_lines.pop()
-                    new_lines.append("[Peer]")
-                new_lines.append(line)
-
-        # Flush remaining PEER_MARKER
+        # Simple line-by-line approach
+        lines = conf.split("
+")
         result = []
-        for l in new_lines:
-            if isinstance(l, tuple):
-                result.append("[Peer]")
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            if line.strip() == "[Peer]":
+                # Collect this peer block
+                block = [line]
+                i += 1
+                while i < len(lines) and (lines[i].strip() == "" or not lines[i].startswith("[")):
+                    block.append(lines[i])
+                    i += 1
+                # Check if this block contains our pubkey
+                if not any(pubkey in l for l in block):
+                    result.extend(block)
             else:
-                result.append(l)
+                result.append(line)
+                i += 1
 
         new_conf = "
 ".join(result)
