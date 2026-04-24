@@ -275,7 +275,8 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 result.append(l)
 
-        new_conf = "\n".join(result)
+        new_conf = "
+".join(result)
         subprocess.run(
             ["docker", "exec", "-i", CONTAINER, "sh", "-c", f"cat > {CONF_PATH}"],
             input=new_conf, text=True
