@@ -175,7 +175,8 @@ function renderUsers(users) {
     list.innerHTML = '<div class="empty">Пользователей пока нет</div>';
     return;
   }
-  list.innerHTML = users.map(u => `
+  window._users = users;
+  list.innerHTML = users.map((u, i) => `
     <div class="user-card">
       <div class="user-avatar">${(u.name || "?")[0].toUpperCase()}</div>
       <div class="user-info">
@@ -186,7 +187,7 @@ function renderUsers(users) {
           <span class="status-text ${u.active ? 'on' : 'off'}">${u.active ? "Онлайн" : "Оффлайн"}</span>
         </div>
       </div>
-      <button class="del-btn" onclick="askDelete('${u.pubkey}', '${u.name || "пользователя"}')">🗑</button>
+      <button class="del-btn" onclick="askDelete(${i})">🗑</button>
     </div>
   `).join("");
 }
