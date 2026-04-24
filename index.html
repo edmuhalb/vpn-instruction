@@ -146,23 +146,6 @@
   ⚙️ Управление пользователями
 </a>
 
-<div class="config-card">
-  <h2>🔑 Получить конфигурацию</h2>
-  <p>Введите ваше имя — мы создадим персональный конфиг для подключения</p>
-  <div class="config-row">
-    <input class="config-input" id="userName" type="text" placeholder="Ваше имя" maxlength="30">
-    <button class="config-btn" id="getConfigBtn" onclick="getConfig()">Получить</button>
-  </div>
-  <div class="config-result" id="configResult">
-    <p>✅ Конфигурация готова!</p>
-    <div class="config-result-btns">
-      <a class="config-download" id="openBtn" href="#">📲 Открыть в AmneziaVPN</a>
-      <button class="config-download" id="downloadBtn" onclick="downloadConfig()">⬇️ Скачать файл</button>
-    </div>
-  </div>
-  <div class="config-error" id="configError"></div>
-</div>
-
 <div class="tab-row">
   <div class="tab active" onclick="showTab('ios')">🍎 iPhone (iOS)</div>
   <div class="tab" onclick="showTab('android')">🤖 Android</div>
@@ -190,8 +173,31 @@
   </div>
 
   <div class="card">
-    <h2><span class="icon">📁</span> Шаг 2 — Добавьте конфигурацию</h2>
-    <p style="font-size:14px;color:#666;margin-bottom:14px;">Вам должны были прислать файл с расширением .conf, QR-код или ссылку</p>
+    <h2><span class="icon">📁</span> Шаг 2 — Получите конфигурацию</h2>
+    <p style="font-size:13px;color:#666;margin-bottom:12px;">Введите ваше имя — мы создадим персональный конфиг</p>
+    <div class="config-row">
+      <input class="config-input" style="border:1.5px solid #e5e7eb;color:#1a1a2e;" id="userName" type="text" placeholder="Ваше имя" maxlength="30">
+      <button class="config-btn" style="background:#4f46e5;color:#fff;" id="getConfigBtn" onclick="getConfig()">Получить</button>
+    </div>
+    <div class="config-result" id="configResult">
+      <p style="color:#16a34a;font-size:13px;margin-top:12px;margin-bottom:8px;">✅ Конфигурация готова!</p>
+      <div class="config-result-btns">
+        <a class="config-download" id="openBtn" href="#" style="background:#4f46e5;color:#fff;">📲 Открыть в AmneziaVPN</a>
+        <button class="config-download" id="downloadBtn" onclick="downloadConfig()" style="background:#fff;color:#4f46e5;border:1.5px solid #4f46e5;">⬇️ Скачать файл</button>
+      </div>
+      <div style="margin-top:10px;">
+        <p style="font-size:12px;color:#888;margin-bottom:6px;">Или скопируйте ссылку и вставьте в приложение:</p>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="vpnUrl" type="text" readonly style="flex:1;padding:9px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:12px;font-family:monospace;color:#4f46e5;background:#f8f7ff;outline:none;min-width:0;">
+          <button onclick="copyUrl()" style="padding:9px 12px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;" id="copyBtn">Копировать</button>
+        </div>
+      </div>
+    </div>
+    <div class="config-error" id="configError"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📋</span> Шаг 3 — Добавьте конфигурацию в приложение</h2>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-text">Откройте установленное приложение</div>
@@ -203,18 +209,14 @@
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-text">
-        Выберите способ добавления:
-        <span class="note">📷 <b>Сканировать QR-код</b> — если прислали картинку<br>📄 <b>Из файла</b> — если прислали файл .conf<br>🔗 <b>Вставить ссылку</b> — если прислали URL</span>
+        Выберите способ:
+        <span class="note">📲 <b>Открыть в AmneziaVPN</b> — нажмите кнопку выше<br>🔗 <b>Вставить ссылку</b> — скопируйте URL выше<br>⬇️ <b>Из файла</b> — скачайте файл выше</span>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-text">Нажмите <b>«Добавить»</b></div>
     </div>
   </div>
 
   <div class="card">
-    <h2><span class="icon">🔌</span> Шаг 3 — Включите VPN</h2>
+    <h2><span class="icon">🔌</span> Шаг 4 — Включите VPN</h2>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-text">На главном экране приложения нажмите большую кнопку <b>«Подключить»</b></div>
@@ -279,8 +281,12 @@
   </div>
 
   <div class="card">
-    <h2><span class="icon">📁</span> Шаг 2 — Добавьте конфигурацию</h2>
-    <p style="font-size:14px;color:#666;margin-bottom:14px;">Вам должны были прислать файл с расширением .conf, QR-код или ссылку</p>
+    <h2><span class="icon">📋</span> Шаг 2 — Получите конфигурацию</h2>
+    <p style="font-size:13px;color:#666;margin-bottom:4px;">Конфигурация создаётся на вкладке iPhone — используйте ту же ссылку или файл</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📋</span> Шаг 3 — Добавьте конфигурацию в приложение</h2>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-text">Откройте установленное приложение</div>
@@ -292,18 +298,14 @@
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-text">
-        Выберите способ добавления:
-        <span class="note">📷 <b>Сканировать QR-код</b> — если прислали картинку<br>📄 <b>Из файла</b> — если прислали файл .conf<br>🔗 <b>Вставить ссылку</b> — если прислали URL</span>
+        Выберите способ:
+        <span class="note">📲 <b>Открыть в AmneziaVPN</b> — нажмите кнопку на вкладке iOS<br>🔗 <b>Вставить ссылку</b> — скопируйте URL с вкладки iOS<br>⬇️ <b>Из файла</b> — скачайте файл с вкладки iOS</span>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-text">Нажмите <b>«Добавить»</b></div>
     </div>
   </div>
 
   <div class="card">
-    <h2><span class="icon">🔌</span> Шаг 3 — Включите VPN</h2>
+    <h2><span class="icon">🔌</span> Шаг 4 — Включите VPN</h2>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-text">На главном экране приложения нажмите большую кнопку <b>«Подключить»</b></div>
@@ -396,6 +398,7 @@ async function getConfig() {
     lastConfig = data.config;
     lastName = name;
     document.getElementById("openBtn").href = data.url;
+    document.getElementById("vpnUrl").value = data.url;
     result.classList.add("show");
   } catch(e) {
     error.textContent = "Ошибка: " + e.message;
@@ -404,6 +407,16 @@ async function getConfig() {
     btn.disabled = false;
     btn.textContent = "Получить";
   }
+}
+
+function copyUrl() {
+  const input = document.getElementById("vpnUrl");
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value).catch(() => document.execCommand("copy"));
+  const btn = document.getElementById("copyBtn");
+  btn.textContent = "Скопировано!";
+  setTimeout(() => btn.textContent = "Копировать", 2000);
 }
 
 function downloadConfig() {
