@@ -156,12 +156,82 @@
   }
 
   .icon { font-size: 20px; }
+
+  /* Config form */
+  .config-card {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 28px;
+    color: #fff;
+  }
+  .config-card h2 { color: #fff; font-size: 18px; margin-bottom: 6px; }
+  .config-card p { font-size: 14px; opacity: .85; margin-bottom: 16px; }
+  .config-row { display: flex; gap: 10px; }
+  .config-input {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    outline: none;
+    color: #1a1a2e;
+  }
+  .config-btn {
+    padding: 12px 18px;
+    background: #fff;
+    color: #4f46e5;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .config-btn:disabled { opacity: .6; cursor: default; }
+  .config-result {
+    margin-top: 14px;
+    background: rgba(255,255,255,.15);
+    border-radius: 10px;
+    padding: 14px;
+    display: none;
+  }
+  .config-result.show { display: block; }
+  .config-result p { margin-bottom: 10px; font-size: 14px; opacity: 1; }
+  .config-download {
+    display: inline-block;
+    background: #fff;
+    color: #4f46e5;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+  }
+  .config-error { color: #fca5a5; font-size: 14px; margin-top: 10px; display: none; }
+  .config-error.show { display: block; }
 </style>
 </head>
 <body>
 
 <h1>📡 Ваш семейный VPN</h1>
 <p class="subtitle">Простая инструкция — всего несколько шагов</p>
+
+<div class="config-card">
+  <h2>🔑 Получить конфигурацию</h2>
+  <p>Введите ваше имя — мы создадим персональный конфиг для подключения</p>
+  <div class="config-row">
+    <input class="config-input" id="userName" type="text" placeholder="Ваше имя" maxlength="30">
+    <button class="config-btn" id="getConfigBtn" onclick="getConfig()">Получить</button>
+  </div>
+  <div class="config-result" id="configResult">
+    <p>✅ Конфигурация готова! Скачайте файл и добавьте его в приложение.</p>
+    <button class="config-download" id="downloadBtn" onclick="downloadConfig()">⬇️ Скачать конфиг</button>
+  </div>
+  <div class="config-error" id="configError"></div>
+</div>
 
 <div class="tab-row">
   <div class="tab active" onclick="showTab('ios')">🍎 iPhone (iOS)</div>
@@ -367,6 +437,53 @@
 </div>
 
 <script>
+const API_URL = "http://194.226.169.15:8765/create";
+const API_SECRET = "vpn-secret-2024";
+let lastConfig = null;
+let lastName = null;
+
+async function getConfig() {
+  const name = document.getElementById("userName").value.trim();
+  if (!name) { alert("Введите ваше имя"); return; }
+
+  const btn = document.getElementById("getConfigBtn");
+  const result = document.getElementById("configResult");
+  const error = document.getElementById("configError");
+
+  btn.disabled = true;
+  btn.textContent = "Создаём...";
+  result.classList.remove("show");
+  error.classList.remove("show");
+
+  try {
+    const resp = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Secret": API_SECRET },
+      body: JSON.stringify({ name })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    lastConfig = data.config;
+    lastName = name;
+    result.classList.add("show");
+  } catch(e) {
+    error.textContent = "Ошибка: " + e.message;
+    error.classList.add("show");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Получить";
+  }
+}
+
+function downloadConfig() {
+  if (!lastConfig) return;
+  const blob = new Blob([lastConfig], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (lastName || "vpn") + ".conf";
+  a.click();
+}
+
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
