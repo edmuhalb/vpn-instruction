@@ -212,6 +212,81 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({"users": users}).encode())
 
+    def do_DELETE(self):
+        if self.path != "/users":
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        secret = self.headers.get("X-Secret", "")
+        if secret != API_SECRET:
+            self.send_response(403)
+            self.send_cors()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "Forbidden"}).encode())
+            return
+
+        length = int(self.headers.get("Content-Length", 0))
+        body = json.loads(self.rfile.read(length))
+        pubkey = body.get("pubkey", "").strip()
+
+        if not pubkey:
+            self.send_response(400)
+            self.send_cors()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "pubkey required"}).encode())
+            return
+
+        # Remove peer from live WireGuard
+        subprocess.run(["docker", "exec", CONTAINER, "awg", "set", "awg0", "peer", pubkey, "remove"])
+
+        # Remove peer block from config file
+        conf = docker_exec(["cat", CONF_PATH])
+        lines = conf.splitlines()
+        new_lines = []
+        skip = False
+        for line in lines:
+            if line.strip() == "[Peer]":
+                # Look ahead to check if this peer has our pubkey
+                skip = False
+                new_lines.append(("PEER_MARKER", []))
+            elif skip:
+                continue
+            elif line.strip().startswith("PublicKey") and pubkey in line:
+                # Remove last PEER_MARKER block
+                for i in range(len(new_lines)-1, -1, -1):
+                    if new_lines[i] == ("PEER_MARKER", []):
+                        new_lines = new_lines[:i]
+                        break
+                skip = True
+            else:
+                if new_lines and isinstance(new_lines[-1], tuple):
+                    peer_marker = new_lines.pop()
+                    new_lines.append("[Peer]")
+                new_lines.append(line)
+
+        # Flush remaining PEER_MARKER
+        result = []
+        for l in new_lines:
+            if isinstance(l, tuple):
+                result.append("[Peer]")
+            else:
+                result.append(l)
+
+        new_conf = "\n".join(result)
+        subprocess.run(
+            ["docker", "exec", "-i", CONTAINER, "sh", "-c", f"cat > {CONF_PATH}"],
+            input=new_conf, text=True
+        )
+
+        self.send_response(200)
+        self.send_cors()
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({"ok": True}).encode())
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_cors()
