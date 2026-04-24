@@ -10,25 +10,32 @@ export default async function handler(req, res) {
   if (secret !== "11111111") return res.status(403).json({ error: "Forbidden" });
 
   try {
-    const opts = {
-      method: req.method,
-      headers: { "Content-Type": "application/json", "X-Secret": "11111111" }
-    };
+    let body = undefined;
+    let bodyStr = undefined;
 
     if (req.method === "DELETE") {
-      const body = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
-      opts.body = body;
+      bodyStr = typeof req.body === "string" ? req.body : JSON.stringify(req.body || {});
     }
 
-    const response = await fetch("http://194.226.169.15:8765/users", opts);
+    const fetchOpts = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Secret": "11111111",
+        ...(bodyStr ? { "Content-Length": Buffer.byteLength(bodyStr).toString() } : {})
+      },
+      ...(bodyStr ? { body: bodyStr } : {})
+    };
+
+    const response = await fetch("http://194.226.169.15:8765/users", fetchOpts);
     const text = await response.text();
 
     try {
       res.status(200).json(JSON.parse(text));
     } catch {
-      res.status(500).json({ error: "Invalid response from API: " + text.slice(0, 200) });
+      res.status(500).json({ error: "Bad response: " + text.slice(0, 300) });
     }
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: e.message, stack: e.stack });
   }
 }

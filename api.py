@@ -19,6 +19,16 @@ AWG_PARAMS = {
     "H3": "1999736174", "H4": "2099948346"
 }
 
+# In-memory log ring buffer
+import datetime
+_logs = []
+def log(level, msg):
+    entry = {"t": datetime.datetime.utcnow().isoformat(), "level": level, "msg": msg}
+    _logs.append(entry)
+    if len(_logs) > 200:
+        _logs.pop(0)
+    print("[%s] %s: %s" % (entry["t"], level, msg))
+
 def docker_exec(cmd):
     r = subprocess.run(["docker", "exec", CONTAINER] + cmd, capture_output=True, text=True)
     return r.stdout.strip()
@@ -165,6 +175,9 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if self.path == "/logs":
+            if not self.check_secret(): return self.send_json(403, {"error": "Forbidden"})
+            return self.send_json(200, {"logs": _logs[-50:]})
         if self.path != "/users": return self.send_json(404, {"error": "Not found"})
         if not self.check_secret(): return self.send_json(403, {"error": "Forbidden"})
         self.send_json(200, {"users": list_users()})
@@ -184,12 +197,20 @@ class Handler(BaseHTTPRequestHandler):
     def do_DELETE(self):
         if self.path != "/users": return self.send_json(404, {"error": "Not found"})
         if not self.check_secret(): return self.send_json(403, {"error": "Forbidden"})
-        length = int(self.headers.get("Content-Length", 0))
-        body = json.loads(self.rfile.read(length))
-        pubkey = body.get("pubkey", "").strip()
-        if not pubkey: return self.send_json(400, {"error": "pubkey required"})
-        delete_user(pubkey)
-        self.send_json(200, {"ok": True})
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+            raw = self.rfile.read(length)
+            log("INFO", "DELETE body raw: %s" % raw)
+            body = json.loads(raw)
+            pubkey = body.get("pubkey", "").strip()
+            if not pubkey: return self.send_json(400, {"error": "pubkey required"})
+            log("INFO", "Deleting pubkey: %s" % pubkey)
+            delete_user(pubkey)
+            log("INFO", "Deleted OK: %s" % pubkey)
+            self.send_json(200, {"ok": True})
+        except Exception as e:
+            log("ERROR", "DELETE error: %s" % str(e))
+            self.send_json(500, {"error": str(e)})
 
 if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", 8765), Handler)
