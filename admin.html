@@ -143,8 +143,8 @@
     <h3>Удалить пользователя?</h3>
     <p id="modalText">Пользователь потеряет доступ к VPN.</p>
     <div class="modal-btns">
-      <button class="modal-confirm" onclick="confirmDelete()">🗑 Удалить</button>
-      <button class="modal-cancel" onclick="closeModal()">Отмена</button>
+      <button type="button" class="modal-confirm" id="confirmBtn">🗑 Удалить</button>
+      <button type="button" class="modal-cancel" id="cancelBtn">Отмена</button>
     </div>
   </div>
 </div>
@@ -203,7 +203,8 @@ function closeModal() {
   pendingPubkey = null;
 }
 async function confirmDelete() {
-  if (!pendingPubkey) return;
+  console.log("confirmDelete called, pendingPubkey=", pendingPubkey);
+  if (!pendingPubkey) { console.warn("no pendingPubkey"); return; }
   const pubkey = pendingPubkey;
   closeModal();
   try {
@@ -222,6 +223,9 @@ async function confirmDelete() {
     renderUsers(d.users || []);
   } catch(e) { alert("Ошибка: " + e.message); }
 }
+
+document.getElementById("confirmBtn").addEventListener("click", confirmDelete);
+document.getElementById("cancelBtn").addEventListener("click", closeModal);
 </script>
 </body>
 </html>
