@@ -1,0 +1,12 @@
+[Unit]
+Description=VPN Config API
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/vpn-api/api.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

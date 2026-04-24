@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+import subprocess
+import json
+import os
+import re
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import parse_qs, urlparse
+
+# ── Конфигурация сервера ──────────────────────────────────────────
+SERVER_IP       = "194.226.169.15"
+SERVER_PORT     = "37930"
+SUBNET          = "10.8.1"
+CONF_PATH       = "/opt/amnezia/awg/awg0.conf"
+CONTAINER       = "amnezia-awg2"
+API_SECRET      = "vpn-secret-2024"   # поменяй на свой
+
+# AmneziaWG параметры (из конфига сервера)
+AWG_PARAMS = {
+    "Jc": "4", "Jmin": "10", "Jmax": "50",
+    "S1": "147", "S2": "29", "S3": "21", "S4": "6",
+    "H1": "1209694282", "H2": "1816253784",
+    "H3": "1999736174", "H4": "2099948346"
+}
+
+def docker_exec(cmd):
+    result = subprocess.run(
+        ["docker", "exec", CONTAINER] + cmd,
+        capture_output=True, text=True
+    )
+    return result.stdout.strip()
+
+def docker_exec_input(cmd, stdin_data):
+    result = subprocess.run(
+        ["docker", "exec", "-i", CONTAINER] + cmd,
+        input=stdin_data, capture_output=True, text=True
+    )
+    return result.stdout.strip()
+
+def get_server_pubkey():
+    privkey = None
+    conf = docker_exec(["cat", CONF_PATH])
+    for line in conf.splitlines():
+        if line.startswith("PrivateKey"):
+            privkey = line.split("=", 1)[1].strip()
+            break
+    if not privkey:
+        return None
+    return docker_exec_input(["awg", "pubkey"], privkey)
+
+def get_next_ip():
+    conf = docker_exec(["cat", CONF_PATH])
+    used = []
+    for line in conf.splitlines():
+        m = re.search(r'AllowedIPs\s*=\s*10\.8\.1\.(\d+)', line)
+        if m:
+            used.append(int(m.group(1)))
+    for i in range(2, 255):
+        if i not in used:
+            return f"{SUBNET}.{i}"
+    return None
+
+def get_preshared_key():
+    conf = docker_exec(["cat", CONF_PATH])
+    for line in conf.splitlines():
+        if line.startswith("PresharedKey"):
+            return line.split("=", 1)[1].strip()
+    return docker_exec(["awg", "genpsk"])
+
+def create_user(name):
+    # Генерируем ключи клиента
+    client_privkey = docker_exec(["awg", "genkey"])
+    client_pubkey  = docker_exec_input(["awg", "pubkey"], client_privkey)
+    preshared_key  = get_preshared_key()
+    client_ip      = get_next_ip()
+    server_pubkey  = get_server_pubkey()
+
+    if not client_ip:
+        return None, "Нет свободных IP-адресов"
+    if not server_pubkey:
+        return None, "Не удалось получить публичный ключ сервера"
+
+    # Добавляем пир в конфиг сервера
+    peer_block = f"\n[Peer]\n# {name}\nPublicKey = {client_pubkey}\nPresharedKey = {preshared_key}\nAllowedIPs = {client_ip}/32\n"
+    
+    # Записываем в конфиг
+    subprocess.run(
+        ["docker", "exec", "-i", CONTAINER, "sh", "-c", f"echo '{peer_block}' >> {CONF_PATH}"],
+    )
+
+    # Применяем без разрыва соединений
+    docker_exec(["awg", "addconf", "awg0", CONF_PATH])
+    subprocess.run(["docker", "exec", CONTAINER, "awg", "set", "awg0",
+        "peer", client_pubkey,
+        "preshared-key", "/dev/stdin",
+        "allowed-ips", f"{client_ip}/32"],
+        input=preshared_key, text=True
+    )
+
+    # Формируем клиентский конфиг (AmneziaWG формат)
+    client_conf = f"""[Interface]
+PrivateKey = {client_privkey}
+Address = {client_ip}/24
+DNS = 1.1.1.1, 8.8.8.8
+Jc = {AWG_PARAMS['Jc']}
+Jmin = {AWG_PARAMS['Jmin']}
+Jmax = {AWG_PARAMS['Jmax']}
+S1 = {AWG_PARAMS['S1']}
+S2 = {AWG_PARAMS['S2']}
+S3 = {AWG_PARAMS['S3']}
+S4 = {AWG_PARAMS['S4']}
+H1 = {AWG_PARAMS['H1']}
+H2 = {AWG_PARAMS['H2']}
+H3 = {AWG_PARAMS['H3']}
+H4 = {AWG_PARAMS['H4']}
+
+[Peer]
+PublicKey = {server_pubkey}
+PresharedKey = {preshared_key}
+Endpoint = {SERVER_IP}:{SERVER_PORT}
+AllowedIPs = 0.0.0.0/0
+PersistentKeepalive = 25
+"""
+    return client_conf, None
+
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass  # отключаем лишние логи
+
+    def send_cors(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Secret")
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_cors()
+        self.end_headers()
+
+    def do_POST(self):
+        if self.path != "/create":
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        # Проверяем секрет
+        secret = self.headers.get("X-Secret", "")
+        if secret != API_SECRET:
+            self.send_response(403)
+            self.send_cors()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "Forbidden"}).encode())
+            return
+
+        length = int(self.headers.get("Content-Length", 0))
+        body   = json.loads(self.rfile.read(length))
+        name   = body.get("name", "user").strip() or "user"
+
+        conf, err = create_user(name)
+
+        self.send_response(200)
+        self.send_cors()
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+
+        if err:
+            self.wfile.write(json.dumps({"error": err}).encode())
+        else:
+            self.wfile.write(json.dumps({"config": conf, "name": name}).encode())
+
+
+if __name__ == "__main__":
+    server = HTTPServer(("0.0.0.0", 8765), Handler)
+    print("VPN API запущен на порту 8765")
+    server.serve_forever()
