@@ -8,120 +8,143 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-    background: #f0f4f8;
-    color: #1a1a2e;
-    padding: 24px 16px 48px;
-    max-width: 720px;
-    margin: 0 auto;
+    background: #f0f4f8; color: #1a1a2e;
+    padding: 16px 14px 60px; max-width: 600px; margin: 0 auto;
   }
-  h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
-  .sub { color: #666; font-size: 14px; margin-bottom: 24px; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .sub { color: #666; font-size: 13px; margin-bottom: 20px; }
 
+  /* Login */
   .login-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
-    margin-bottom: 20px;
+    background: #fff; border-radius: 14px;
+    padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
   }
   .login-card input {
-    width: 100%; padding: 12px; border: 1.5px solid #ddd;
-    border-radius: 10px; font-size: 15px; margin-bottom: 10px; outline: none;
+    width: 100%; padding: 13px 14px;
+    border: 1.5px solid #ddd; border-radius: 10px;
+    font-size: 16px; margin-bottom: 10px; outline: none;
+    -webkit-appearance: none;
   }
   .login-card input:focus { border-color: #4f46e5; }
   .btn {
-    width: 100%; padding: 12px; background: #4f46e5; color: #fff;
-    border: none; border-radius: 10px; font-size: 15px;
-    font-weight: 700; cursor: pointer;
+    width: 100%; padding: 14px;
+    background: #4f46e5; color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 16px; font-weight: 700; cursor: pointer;
   }
-  .btn:hover { background: #4338ca; }
+  #loginError { color: #ef4444; font-size: 13px; margin-top: 8px; }
 
-  .card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .card-header h2 { font-size: 17px; font-weight: 700; }
-  .count { background: #ede9fe; color: #4f46e5; padding: 3px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+  /* Header row */
+  .list-header {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 12px;
+  }
+  .list-header h2 { font-size: 16px; font-weight: 700; }
+  .count {
+    background: #ede9fe; color: #4f46e5;
+    padding: 3px 12px; border-radius: 20px;
+    font-size: 13px; font-weight: 700;
+  }
 
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; font-size: 12px; color: #888; font-weight: 600; padding: 6px 12px; border-bottom: 1px solid #eee; }
-  td { padding: 13px 12px; font-size: 14px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #fafafa; }
-
-  .name { font-weight: 600; color: #1a1a2e; }
-  .ip { font-family: monospace; color: #4f46e5; font-size: 13px; }
-  .pubkey { font-family: monospace; font-size: 11px; color: #aaa; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+  /* User cards */
+  .user-card {
+    background: #fff; border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .user-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #ede9fe; color: #4f46e5;
+    font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+  .user-meta {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #888; flex-wrap: wrap;
+  }
+  .user-ip { font-family: monospace; color: #4f46e5; font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; }
   .dot.on { background: #22c55e; }
   .dot.off { background: #d1d5db; }
+  .status-text { font-size: 12px; }
+  .status-text.on { color: #16a34a; }
+  .status-text.off { color: #9ca3af; }
 
   .del-btn {
-    background: none; border: none; cursor: pointer;
-    color: #ef4444; font-size: 18px; padding: 4px 8px;
-    border-radius: 6px; line-height: 1;
+    background: #fef2f2; border: none; cursor: pointer;
+    color: #ef4444; font-size: 20px; padding: 8px;
+    border-radius: 10px; flex-shrink: 0; line-height: 1;
   }
-  .del-btn:hover { background: #fef2f2; }
 
-  .empty { text-align: center; color: #aaa; padding: 40px; font-size: 15px; }
-  #error { color: #ef4444; font-size: 14px; margin-top: 8px; }
+  .empty {
+    text-align: center; color: #aaa;
+    padding: 40px 20px; font-size: 14px;
+  }
 
+  /* Modal */
   .modal-bg {
     display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.4); z-index: 100;
-    align-items: center; justify-content: center;
+    background: rgba(0,0,0,.5); z-index: 100;
+    align-items: flex-end; justify-content: center;
+    padding: 0;
   }
   .modal-bg.show { display: flex; }
   .modal {
-    background: #fff; border-radius: 16px; padding: 24px;
-    max-width: 340px; width: 90%; text-align: center;
+    background: #fff; border-radius: 20px 20px 0 0;
+    padding: 24px 20px 40px; width: 100%;
+    max-width: 600px; text-align: center;
   }
-  .modal h3 { font-size: 17px; margin-bottom: 8px; }
-  .modal p { font-size: 14px; color: #666; margin-bottom: 20px; }
-  .modal-btns { display: flex; gap: 10px; }
-  .modal-cancel { flex: 1; padding: 11px; border: 1.5px solid #ddd; background: #fff; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 600; }
-  .modal-confirm { flex: 1; padding: 11px; background: #ef4444; color: #fff; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 700; }
+  .modal-handle {
+    width: 36px; height: 4px; background: #e5e7eb;
+    border-radius: 2px; margin: 0 auto 20px;
+  }
+  .modal h3 { font-size: 18px; margin-bottom: 8px; }
+  .modal p { font-size: 14px; color: #666; margin-bottom: 24px; line-height: 1.5; }
+  .modal-btns { display: flex; flex-direction: column; gap: 10px; }
+  .modal-confirm {
+    padding: 14px; background: #ef4444; color: #fff;
+    border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+  }
+  .modal-cancel {
+    padding: 14px; border: 1.5px solid #e5e7eb;
+    background: #fff; border-radius: 12px;
+    font-size: 16px; font-weight: 600; cursor: pointer; color: #333;
+  }
 </style>
 </head>
 <body>
-<h1>👥 Пользователи VPN</h1>
-<p class="sub">Управление конфигурациями</p>
 
-<div class="login-card" id="loginCard">
-  <input type="password" id="secretInput" placeholder="Введите пароль администратора"
+<h1>👥 Пользователи</h1>
+<p class="sub">Управление VPN-конфигурациями</p>
+
+<div id="loginCard" class="login-card">
+  <input type="password" id="secretInput" placeholder="Пароль администратора"
     onkeydown="if(event.key==='Enter')loadUsers()">
   <button class="btn" onclick="loadUsers()">Войти</button>
-  <div id="error"></div>
+  <div id="loginError"></div>
 </div>
 
-<div class="card" id="usersCard" style="display:none">
-  <div class="card-header">
+<div id="usersSection" style="display:none">
+  <div class="list-header">
     <h2>Конфигурации</h2>
     <span class="count" id="count">0</span>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Имя</th>
-        <th>IP-адрес</th>
-        <th>Публичный ключ</th>
-        <th>Статус</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="userList"></tbody>
-  </table>
-  <div class="empty" id="emptyMsg" style="display:none">Пользователей пока нет</div>
+  <div id="userList"></div>
 </div>
 
-<!-- Модалка подтверждения -->
 <div class="modal-bg" id="modalBg">
   <div class="modal">
+    <div class="modal-handle"></div>
     <h3>Удалить пользователя?</h3>
-    <p id="modalText">Конфиг будет отозван и пользователь потеряет доступ.</p>
+    <p id="modalText">Пользователь потеряет доступ к VPN.</p>
     <div class="modal-btns">
+      <button class="modal-confirm" onclick="confirmDelete()">🗑 Удалить</button>
       <button class="modal-cancel" onclick="closeModal()">Отмена</button>
-      <button class="modal-confirm" onclick="confirmDelete()">Удалить</button>
     </div>
   </div>
 </div>
@@ -132,81 +155,64 @@ let pendingPubkey = null;
 
 async function loadUsers() {
   secret = document.getElementById("secretInput").value;
-  const err = document.getElementById("error");
+  const err = document.getElementById("loginError");
   err.textContent = "";
-
   try {
     const resp = await fetch("/api/users", { headers: { "X-Secret": secret } });
     if (resp.status === 403) throw new Error("Неверный пароль");
     const data = await resp.json();
     if (data.error) throw new Error(data.error);
-
     document.getElementById("loginCard").style.display = "none";
-    document.getElementById("usersCard").style.display = "block";
+    document.getElementById("usersSection").style.display = "block";
     renderUsers(data.users || []);
-  } catch(e) {
-    err.textContent = e.message;
-  }
+  } catch(e) { err.textContent = e.message; }
 }
 
 function renderUsers(users) {
   document.getElementById("count").textContent = users.length;
   const list = document.getElementById("userList");
-  const empty = document.getElementById("emptyMsg");
-
-  if (users.length === 0) {
-    list.innerHTML = "";
-    empty.style.display = "block";
+  if (!users.length) {
+    list.innerHTML = '<div class="empty">Пользователей пока нет</div>';
     return;
   }
-  empty.style.display = "none";
-  list.innerHTML = users.map((u, i) => `
-    <tr>
-      <td style="color:#aaa;font-size:13px">${i + 1}</td>
-      <td><span class="name">${u.name || "—"}</span></td>
-      <td><span class="ip">${u.ip || "—"}</span></td>
-      <td><span class="pubkey" title="${u.pubkey || ""}">${u.pubkey || "—"}</span></td>
-      <td>
-        <span class="dot ${u.active ? 'on' : 'off'}"></span>
-        ${u.active ? "Онлайн" : "Оффлайн"}
-      </td>
-      <td>
-        <button class="del-btn" title="Удалить" onclick="askDelete('${u.pubkey}', '${u.name || "пользователя"}')">🗑</button>
-      </td>
-    </tr>
+  list.innerHTML = users.map(u => `
+    <div class="user-card">
+      <div class="user-avatar">${(u.name || "?")[0].toUpperCase()}</div>
+      <div class="user-info">
+        <div class="user-name">${u.name || "Без имени"}</div>
+        <div class="user-meta">
+          <span class="user-ip">${u.ip || "—"}</span>
+          <span class="dot ${u.active ? 'on' : 'off'}"></span>
+          <span class="status-text ${u.active ? 'on' : 'off'}">${u.active ? "Онлайн" : "Оффлайн"}</span>
+        </div>
+      </div>
+      <button class="del-btn" onclick="askDelete('${u.pubkey}', '${u.name || "пользователя"}')">🗑</button>
+    </div>
   `).join("");
 }
 
 function askDelete(pubkey, name) {
   pendingPubkey = pubkey;
-  document.getElementById("modalText").textContent = `Пользователь «${name}» потеряет доступ к VPN.`;
+  document.getElementById("modalText").textContent = `«${name}» потеряет доступ к VPN.`;
   document.getElementById("modalBg").classList.add("show");
 }
-
 function closeModal() {
   document.getElementById("modalBg").classList.remove("show");
   pendingPubkey = null;
 }
-
 async function confirmDelete() {
   if (!pendingPubkey) return;
   closeModal();
-
   try {
-    const resp = await fetch("/api/users", {
+    await fetch("/api/users", {
       method: "DELETE",
       headers: { "Content-Type": "application/json", "X-Secret": secret },
       body: JSON.stringify({ pubkey: pendingPubkey })
     });
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error);
-    // Перезагружаем список
-    const r2 = await fetch("/api/users", { headers: { "X-Secret": secret } });
-    const d2 = await r2.json();
-    renderUsers(d2.users || []);
-  } catch(e) {
-    alert("Ошибка: " + e.message);
-  }
+    const r = await fetch("/api/users", { headers: { "X-Secret": secret } });
+    const d = await r.json();
+    renderUsers(d.users || []);
+  } catch(e) { alert("Ошибка: " + e.message); }
 }
 </script>
 </body>

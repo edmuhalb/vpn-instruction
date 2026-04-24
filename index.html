@@ -10,208 +10,132 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     background: #f0f4f8;
     color: #1a1a2e;
-    padding: 24px 16px 48px;
+    padding: 16px 14px 60px;
     max-width: 680px;
     margin: 0 auto;
   }
-  h1 {
-    font-size: 26px;
-    font-weight: 800;
-    color: #1a1a2e;
-    margin-bottom: 6px;
-  }
-  .subtitle {
-    font-size: 15px;
-    color: #666;
-    margin-bottom: 32px;
-  }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: #666; margin-bottom: 20px; }
 
-  .tab-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 28px;
-  }
+  /* Tabs */
+  .tab-row { display: flex; gap: 8px; margin-bottom: 20px; }
   .tab {
-    flex: 1;
-    padding: 12px;
-    border-radius: 12px;
-    border: 2px solid #ddd;
-    background: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
+    flex: 1; padding: 11px 8px;
+    border-radius: 12px; border: 2px solid #ddd;
+    background: #fff; font-size: 14px; font-weight: 600;
+    cursor: pointer; text-align: center; color: #888;
     transition: all .2s;
-    color: #888;
   }
-  .tab.active {
-    background: #4f46e5;
-    border-color: #4f46e5;
-    color: #fff;
-  }
+  .tab.active { background: #4f46e5; border-color: #4f46e5; color: #fff; }
 
   .section { display: none; }
   .section.active { display: block; }
 
+  /* Cards */
   .card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
+    background: #fff; border-radius: 14px;
+    padding: 16px; margin-bottom: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,.06);
   }
   .card h2 {
-    font-size: 17px;
-    font-weight: 700;
-    margin-bottom: 14px;
-    color: #1a1a2e;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .badge {
-    background: #4f46e5;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 12px; color: #1a1a2e;
+    display: flex; align-items: center; gap: 8px;
   }
 
-  .step {
-    display: flex;
-    gap: 14px;
-    margin-bottom: 14px;
-    align-items: flex-start;
-  }
+  /* Steps */
+  .step { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
   .step:last-child { margin-bottom: 0; }
   .step-num {
-    min-width: 28px;
-    height: 28px;
-    background: #ede9fe;
-    color: #4f46e5;
-    border-radius: 50%;
-    font-size: 13px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
+    min-width: 26px; height: 26px;
+    background: #ede9fe; color: #4f46e5;
+    border-radius: 50%; font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
   }
-  .step-text {
-    font-size: 15px;
-    line-height: 1.5;
-    color: #333;
-  }
+  .step-text { font-size: 14px; line-height: 1.5; color: #333; }
   .step-text b { color: #1a1a2e; }
   .step-text .note {
-    display: block;
-    font-size: 13px;
-    color: #888;
-    margin-top: 3px;
+    display: block; font-size: 12px; color: #888; margin-top: 3px;
   }
 
+  /* Store button */
+  .store-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #1a1a2e; color: #fff; text-decoration: none;
+    padding: 10px 16px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; margin-top: 6px;
+  }
+
+  /* Highlight / Warning */
   .highlight {
-    background: #f0fdf4;
-    border: 1.5px solid #86efac;
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 14px;
-    color: #166534;
-    margin-bottom: 16px;
-    line-height: 1.5;
+    background: #f0fdf4; border: 1.5px solid #86efac;
+    border-radius: 12px; padding: 12px 14px;
+    font-size: 13px; color: #166534;
+    margin-bottom: 12px; line-height: 1.5;
   }
   .highlight::before { content: "✅ "; }
-
   .warning {
-    background: #fefce8;
-    border: 1.5px solid #fde047;
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 14px;
-    color: #713f12;
-    margin-bottom: 16px;
-    line-height: 1.5;
+    background: #fefce8; border: 1.5px solid #fde047;
+    border-radius: 12px; padding: 12px 14px;
+    font-size: 13px; color: #713f12;
+    margin-bottom: 12px; line-height: 1.5;
   }
   .warning::before { content: "⚠️ "; }
 
-  .store-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #1a1a2e;
-    color: #fff;
-    text-decoration: none;
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    margin-top: 4px;
-  }
-
-  .divider {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 16px 0;
-  }
-
-  .icon { font-size: 20px; }
+  .icon { font-size: 18px; }
+  .divider { border: none; border-top: 1px solid #eee; margin: 12px 0; }
 
   /* Config form */
   .config-card {
     background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    border-radius: 16px;
-    padding: 22px;
-    margin-bottom: 28px;
-    color: #fff;
+    border-radius: 14px; padding: 18px;
+    margin-bottom: 20px; color: #fff;
   }
-  .config-card h2 { color: #fff; font-size: 18px; margin-bottom: 6px; }
-  .config-card p { font-size: 14px; opacity: .85; margin-bottom: 16px; }
-  .config-row { display: flex; gap: 10px; }
+  .config-card h2 { color: #fff; font-size: 17px; margin-bottom: 4px; }
+  .config-card p { font-size: 13px; opacity: .85; margin-bottom: 14px; line-height: 1.4; }
+  .config-row { display: flex; gap: 8px; }
   .config-input {
-    flex: 1;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: none;
-    font-size: 15px;
-    outline: none;
-    color: #1a1a2e;
+    flex: 1; padding: 11px 12px;
+    border-radius: 10px; border: none;
+    font-size: 15px; outline: none; color: #1a1a2e;
+    min-width: 0;
   }
   .config-btn {
-    padding: 12px 18px;
-    background: #fff;
-    color: #4f46e5;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
+    padding: 11px 14px; background: #fff; color: #4f46e5;
+    border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
   }
   .config-btn:disabled { opacity: .6; cursor: default; }
   .config-result {
-    margin-top: 14px;
-    background: rgba(255,255,255,.15);
-    border-radius: 10px;
-    padding: 14px;
-    display: none;
+    margin-top: 12px; background: rgba(255,255,255,.15);
+    border-radius: 10px; padding: 12px; display: none;
   }
   .config-result.show { display: block; }
-  .config-result p { margin-bottom: 10px; font-size: 14px; opacity: 1; }
+  .config-result p { margin-bottom: 10px; font-size: 13px; opacity: 1; }
+  .config-result-btns { display: flex; flex-direction: column; gap: 8px; }
   .config-download {
-    display: inline-block;
-    background: #fff;
-    color: #4f46e5;
-    padding: 9px 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 14px;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
+    display: block; text-align: center;
+    background: #fff; color: #4f46e5;
+    padding: 11px 16px; border-radius: 8px;
+    font-weight: 700; font-size: 14px;
+    text-decoration: none; cursor: pointer; border: none;
+    width: 100%;
   }
-  .config-error { color: #fca5a5; font-size: 14px; margin-top: 10px; display: none; }
+  .config-error { color: #fca5a5; font-size: 13px; margin-top: 8px; display: none; }
   .config-error.show { display: block; }
+
+  /* FAQ */
+  .faq-q { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .faq-a { font-size: 13px; color: #555; line-height: 1.5; }
+  .faq-icon {
+    min-width: 26px; height: 26px;
+    background: #fef3c7; color: #92400e;
+    border-radius: 50%; font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
@@ -227,10 +151,11 @@
     <button class="config-btn" id="getConfigBtn" onclick="getConfig()">Получить</button>
   </div>
   <div class="config-result" id="configResult">
-    <p>✅ Конфигурация готова! Нажмите кнопку чтобы открыть в приложении:</p>
-    <a class="config-download" id="openBtn" href="#">📲 Открыть в AmneziaVPN</a>
-    &nbsp;
-    <button class="config-download" id="downloadBtn" onclick="downloadConfig()">⬇️ Скачать файл</button>
+    <p>✅ Конфигурация готова!</p>
+    <div class="config-result-btns">
+      <a class="config-download" id="openBtn" href="#">📲 Открыть в AmneziaVPN</a>
+      <button class="config-download" id="downloadBtn" onclick="downloadConfig()">⬇️ Скачать файл</button>
+    </div>
   </div>
   <div class="config-error" id="configError"></div>
 </div>
@@ -414,26 +339,26 @@
 <div class="card" style="border: 2px solid #e0e7ff;">
   <h2><span class="icon">💬</span> Частые вопросы</h2>
   <div class="step">
-    <div class="step-num" style="background:#fef3c7;color:#92400e;">?</div>
+    <div class="faq-icon">?</div>
     <div class="step-text">
-      <b>Интернет стал медленнее?</b>
-      <span class="note">Это нормально — VPN добавляет небольшую нагрузку. Если сильно мешает — можно выключить VPN и включить снова когда нужно.</span>
+      <div class="faq-q">Интернет стал медленнее?</div>
+      <div class="faq-a">Это нормально — VPN добавляет небольшую нагрузку. Если мешает — выключите и включите снова когда нужно.</div>
     </div>
   </div>
   <hr class="divider">
   <div class="step">
-    <div class="step-num" style="background:#fef3c7;color:#92400e;">?</div>
+    <div class="faq-icon">?</div>
     <div class="step-text">
-      <b>Нужно ли держать VPN всегда включённым?</b>
-      <span class="note">Нет, можно включать только когда нужно. Но можно и не выключать — на заряд батареи влияет минимально.</span>
+      <div class="faq-q">Нужно ли держать VPN всегда включённым?</div>
+      <div class="faq-a">Нет, можно включать только когда нужно. На заряд батареи влияет минимально.</div>
     </div>
   </div>
   <hr class="divider">
   <div class="step">
-    <div class="step-num" style="background:#fef3c7;color:#92400e;">?</div>
+    <div class="faq-icon">?</div>
     <div class="step-text">
-      <b>Что-то перестало работать?</b>
-      <span class="note">Попробуйте выключить VPN и включить снова. Если не помогает — позвоните тому, кто настраивал.</span>
+      <div class="faq-q">Что-то перестало работать?</div>
+      <div class="faq-a">Выключите VPN и включите снова. Если не помогает — позвоните тому, кто настраивал.</div>
     </div>
   </div>
 </div>
