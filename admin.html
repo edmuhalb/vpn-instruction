@@ -204,13 +204,19 @@ function closeModal() {
 }
 async function confirmDelete() {
   if (!pendingPubkey) return;
+  const pubkey = pendingPubkey;
   closeModal();
   try {
-    await fetch("/api/users", {
+    const del = await fetch("/api/users", {
       method: "DELETE",
       headers: { "Content-Type": "application/json", "X-Secret": secret },
-      body: JSON.stringify({ pubkey: pendingPubkey })
+      body: JSON.stringify({ pubkey })
     });
+    if (!del.ok) {
+      const err = await del.json().catch(() => ({}));
+      alert("Ошибка удаления: " + (err.error || del.status));
+      return;
+    }
     const r = await fetch("/api/users", { headers: { "X-Secret": secret } });
     const d = await r.json();
     renderUsers(d.users || []);
