@@ -388,7 +388,6 @@ async function getConfig() {
     if (data.error) throw new Error(data.error);
     lastConfig = data.config;
     lastName = name;
-    document.getElementById("openBtn").href = data.url;
     document.getElementById("vpnUrl").value = data.url;
     result.classList.add("show");
   } catch(e) {
