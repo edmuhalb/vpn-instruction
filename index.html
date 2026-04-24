@@ -146,6 +146,25 @@
   ⚙️ Управление пользователями
 </a>
 
+<div class="card" style="border:2px solid #e0e7ff;margin-bottom:20px;">
+  <h2><span class="icon">🔑</span> Шаг 1 — Получите конфигурацию</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">Введите ваше имя — мы создадим персональный конфиг</p>
+  <div class="config-row">
+    <input class="config-input" style="border:1.5px solid #e5e7eb;color:#1a1a2e;" id="userName" type="text" placeholder="Ваше имя" maxlength="30">
+    <button class="config-btn" style="background:#4f46e5;color:#fff;" id="getConfigBtn" onclick="getConfig()">Получить</button>
+  </div>
+  <div class="config-result" id="configResult">
+    <p style="color:#16a34a;font-size:13px;margin-top:12px;margin-bottom:8px;">✅ Конфигурация готова! Скопируйте ссылку и вставьте в приложение:</p>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input id="vpnUrl" type="text" readonly style="flex:1;padding:9px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:12px;font-family:monospace;color:#4f46e5;background:#f8f7ff;outline:none;min-width:0;">
+      <button onclick="copyUrl()" style="padding:9px 12px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;" id="copyBtn">Копировать</button>
+    </div>
+  </div>
+  <div class="config-error" id="configError"></div>
+</div>
+
+<p style="font-size:13px;color:#888;margin-bottom:12px;">Затем выберите ваше устройство:</p>
+
 <div class="tab-row">
   <div class="tab active" onclick="showTab('ios')">🍎 iPhone (iOS)</div>
   <div class="tab" onclick="showTab('android')">🤖 Android</div>
@@ -173,24 +192,7 @@
   </div>
 
   <div class="card">
-    <h2><span class="icon">📁</span> Шаг 2 — Получите конфигурацию</h2>
-    <p style="font-size:13px;color:#666;margin-bottom:12px;">Введите ваше имя — мы создадим персональный конфиг</p>
-    <div class="config-row">
-      <input class="config-input" style="border:1.5px solid #e5e7eb;color:#1a1a2e;" id="userName" type="text" placeholder="Ваше имя" maxlength="30">
-      <button class="config-btn" style="background:#4f46e5;color:#fff;" id="getConfigBtn" onclick="getConfig()">Получить</button>
-    </div>
-    <div class="config-result" id="configResult">
-      <p style="color:#16a34a;font-size:13px;margin-top:12px;margin-bottom:8px;">✅ Конфигурация готова! Скопируйте ссылку и вставьте в приложение:</p>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <input id="vpnUrl" type="text" readonly style="flex:1;padding:9px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:12px;font-family:monospace;color:#4f46e5;background:#f8f7ff;outline:none;min-width:0;">
-        <button onclick="copyUrl()" style="padding:9px 12px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;" id="copyBtn">Копировать</button>
-      </div>
-    </div>
-    <div class="config-error" id="configError"></div>
-  </div>
-
-  <div class="card">
-    <h2><span class="icon">📋</span> Шаг 3 — Добавьте конфигурацию в приложение</h2>
+    <h2><span class="icon">📋</span> Шаг 2 — Добавьте конфигурацию в приложение</h2>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-text">Откройте установленное приложение</div>
@@ -208,7 +210,7 @@
   </div>
 
   <div class="card">
-    <h2><span class="icon">🔌</span> Шаг 4 — Включите VPN</h2>
+    <h2><span class="icon">🔌</span> Шаг 3 — Включите VPN</h2>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-text">На главном экране приложения нажмите большую кнопку <b>«Подключить»</b></div>
@@ -234,7 +236,7 @@
     <h2><span class="icon">❌</span> Как выключить</h2>
     <div class="step">
       <div class="step-num">1</div>
-      <div class="step-text">Откройте <b>AmneziaVPN</b></div>
+      <div class="step-text">Откройте установленное приложение</div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
@@ -273,12 +275,7 @@
   </div>
 
   <div class="card">
-    <h2><span class="icon">📋</span> Шаг 2 — Получите конфигурацию</h2>
-    <p style="font-size:13px;color:#666;margin-bottom:4px;">Конфигурация создаётся на вкладке iPhone — используйте ту же ссылку или файл</p>
-  </div>
-
-  <div class="card">
-    <h2><span class="icon">📋</span> Шаг 3 — Добавьте конфигурацию в приложение</h2>
+    <h2><span class="icon">📋</span> Шаг 2 — Добавьте конфигурацию в приложение</h2>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-text">Откройте установленное приложение</div>
@@ -296,7 +293,7 @@
   </div>
 
   <div class="card">
-    <h2><span class="icon">🔌</span> Шаг 4 — Включите VPN</h2>
+    <h2><span class="icon">🔌</span> Шаг 3 — Включите VPN</h2>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-text">На главном экране приложения нажмите большую кнопку <b>«Подключить»</b></div>
@@ -322,7 +319,7 @@
     <h2><span class="icon">❌</span> Как выключить</h2>
     <div class="step">
       <div class="step-num">1</div>
-      <div class="step-text">Откройте <b>AmneziaVPN</b></div>
+      <div class="step-text">Откройте установленное приложение</div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
