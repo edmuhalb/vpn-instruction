@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 import subprocess
 import json
-import os
 import re
+import base64
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import parse_qs, urlparse
 
-# ── Конфигурация сервера ──────────────────────────────────────────
-SERVER_IP       = "194.226.169.15"
-SERVER_PORT     = "37930"
-SUBNET          = "10.8.1"
-CONF_PATH       = "/opt/amnezia/awg/awg0.conf"
-CONTAINER       = "amnezia-awg2"
-API_SECRET      = "11111111"   # поменяй на свой
+SERVER_IP   = "194.226.169.15"
+SERVER_PORT = "37930"
+SUBNET      = "10.8.1"
+CONF_PATH   = "/opt/amnezia/awg/awg0.conf"
+CONTAINER   = "amnezia-awg2"
+API_SECRET  = "11111111"
 
-# AmneziaWG параметры (из конфига сервера)
 AWG_PARAMS = {
     "Jc": "4", "Jmin": "10", "Jmax": "50",
     "S1": "147", "S2": "29", "S3": "21", "S4": "6",
@@ -23,40 +20,27 @@ AWG_PARAMS = {
 }
 
 def docker_exec(cmd):
-    result = subprocess.run(
-        ["docker", "exec", CONTAINER] + cmd,
-        capture_output=True, text=True
-    )
-    return result.stdout.strip()
+    r = subprocess.run(["docker", "exec", CONTAINER] + cmd, capture_output=True, text=True)
+    return r.stdout.strip()
 
 def docker_exec_input(cmd, stdin_data):
-    result = subprocess.run(
-        ["docker", "exec", "-i", CONTAINER] + cmd,
-        input=stdin_data, capture_output=True, text=True
-    )
-    return result.stdout.strip()
+    r = subprocess.run(["docker", "exec", "-i", CONTAINER] + cmd, input=stdin_data, capture_output=True, text=True)
+    return r.stdout.strip()
 
 def get_server_pubkey():
-    privkey = None
     conf = docker_exec(["cat", CONF_PATH])
     for line in conf.splitlines():
         if line.startswith("PrivateKey"):
             privkey = line.split("=", 1)[1].strip()
-            break
-    if not privkey:
-        return None
-    return docker_exec_input(["awg", "pubkey"], privkey)
+            return docker_exec_input(["awg", "pubkey"], privkey)
+    return None
 
 def get_next_ip():
     conf = docker_exec(["cat", CONF_PATH])
-    used = []
-    for line in conf.splitlines():
-        m = re.search(r'AllowedIPs\s*=\s*10\.8\.1\.(\d+)', line)
-        if m:
-            used.append(int(m.group(1)))
+    used = [int(m.group(1)) for m in (re.search(r'AllowedIPs\s*=\s*10\.8\.1\.(\d+)', l) for l in conf.splitlines()) if m]
     for i in range(2, 255):
         if i not in used:
-            return f"{SUBNET}.{i}"
+            return "%s.%d" % (SUBNET, i)
     return None
 
 def get_preshared_key():
@@ -67,7 +51,6 @@ def get_preshared_key():
     return docker_exec(["awg", "genpsk"])
 
 def create_user(name):
-    # Генерируем ключи клиента
     client_privkey = docker_exec(["awg", "genkey"])
     client_pubkey  = docker_exec_input(["awg", "pubkey"], client_privkey)
     preshared_key  = get_preshared_key()
@@ -75,262 +58,138 @@ def create_user(name):
     server_pubkey  = get_server_pubkey()
 
     if not client_ip:
-        return None, "Нет свободных IP-адресов"
+        return None, None, "Нет свободных IP"
     if not server_pubkey:
-        return None, "Не удалось получить публичный ключ сервера"
+        return None, None, "Ошибка получения ключа сервера"
 
-    # Добавляем пир в конфиг сервера
-    peer_block = f"\n[Peer]\n# {name}\nPublicKey = {client_pubkey}\nPresharedKey = {preshared_key}\nAllowedIPs = {client_ip}/32\n"
-    
-    # Записываем в конфиг
-    subprocess.run(
-        ["docker", "exec", "-i", CONTAINER, "sh", "-c", f"echo '{peer_block}' >> {CONF_PATH}"],
-    )
-
-    # Применяем без разрыва соединений
-    docker_exec(["awg", "addconf", "awg0", CONF_PATH])
+    peer_block = "\n[Peer]\n# %s\nPublicKey = %s\nPresharedKey = %s\nAllowedIPs = %s/32\n" % (
+        name, client_pubkey, preshared_key, client_ip)
+    subprocess.run(["docker", "exec", "-i", CONTAINER, "sh", "-c",
+        "printf '%%s' '%s' >> %s" % (peer_block, CONF_PATH)])
     subprocess.run(["docker", "exec", CONTAINER, "awg", "set", "awg0",
-        "peer", client_pubkey,
-        "preshared-key", "/dev/stdin",
-        "allowed-ips", f"{client_ip}/32"],
-        input=preshared_key, text=True
-    )
+        "peer", client_pubkey, "allowed-ips", "%s/32" % client_ip])
 
-    # Формируем клиентский конфиг (AmneziaWG формат)
-    client_conf = f"""[Interface]
-PrivateKey = {client_privkey}
-Address = {client_ip}/24
-DNS = 1.1.1.1, 8.8.8.8
-Jc = {AWG_PARAMS['Jc']}
-Jmin = {AWG_PARAMS['Jmin']}
-Jmax = {AWG_PARAMS['Jmax']}
-S1 = {AWG_PARAMS['S1']}
-S2 = {AWG_PARAMS['S2']}
-S3 = {AWG_PARAMS['S3']}
-S4 = {AWG_PARAMS['S4']}
-H1 = {AWG_PARAMS['H1']}
-H2 = {AWG_PARAMS['H2']}
-H3 = {AWG_PARAMS['H3']}
-H4 = {AWG_PARAMS['H4']}
+    p = AWG_PARAMS
+    client_conf = (
+        "[Interface]\nPrivateKey = %s\nAddress = %s/24\nDNS = 1.1.1.1, 8.8.8.8\n"
+        "Jc = %s\nJmin = %s\nJmax = %s\nS1 = %s\nS2 = %s\nS3 = %s\nS4 = %s\n"
+        "H1 = %s\nH2 = %s\nH3 = %s\nH4 = %s\n\n"
+        "[Peer]\nPublicKey = %s\nPresharedKey = %s\nEndpoint = %s:%s\n"
+        "AllowedIPs = 0.0.0.0/0\nPersistentKeepalive = 25\n"
+    ) % (client_privkey, client_ip,
+         p["Jc"], p["Jmin"], p["Jmax"], p["S1"], p["S2"], p["S3"], p["S4"],
+         p["H1"], p["H2"], p["H3"], p["H4"],
+         server_pubkey, preshared_key, SERVER_IP, SERVER_PORT)
 
-[Peer]
-PublicKey = {server_pubkey}
-PresharedKey = {preshared_key}
-Endpoint = {SERVER_IP}:{SERVER_PORT}
-AllowedIPs = 0.0.0.0/0
-PersistentKeepalive = 25
-"""
-    # Формируем Amnezia URL (vpn://base64(json))
-    import json, base64
-    amnezia_json = {
-        "containers": [{
-            "awg": {
-                "H1": AWG_PARAMS["H1"], "H2": AWG_PARAMS["H2"],
-                "H3": AWG_PARAMS["H3"], "H4": AWG_PARAMS["H4"],
-                "Jc": AWG_PARAMS["Jc"], "Jmin": AWG_PARAMS["Jmin"],
-                "Jmax": AWG_PARAMS["Jmax"],
-                "S1": AWG_PARAMS["S1"], "S2": AWG_PARAMS["S2"],
-                "S3": AWG_PARAMS["S3"], "S4": AWG_PARAMS["S4"],
-                "last_config": client_conf
-            },
-            "container": "amnezia-awg"
-        }],
+    amnezia_data = {
+        "containers": [{"awg": dict(list(p.items()) + [("last_config", client_conf)]), "container": "amnezia-awg"}],
         "defaultContainer": "amnezia-awg",
-        "description": f"VPN ({name})",
-        "dns1": "1.1.1.1",
-        "dns2": "8.8.8.8",
-        "hostName": SERVER_IP,
-        "port": SERVER_PORT,
-        "splitTunnelSites": [],
-        "splitTunnelType": 0
+        "description": "VPN (%s)" % name,
+        "dns1": "1.1.1.1", "dns2": "8.8.8.8",
+        "hostName": SERVER_IP, "port": SERVER_PORT,
+        "splitTunnelSites": [], "splitTunnelType": 0
     }
-    encoded = base64.urlsafe_b64encode(json.dumps(amnezia_json).encode()).decode()
-    vpn_url = f"vpn://{encoded}"
-
+    vpn_url = "vpn://" + base64.urlsafe_b64encode(json.dumps(amnezia_data).encode()).decode()
     return client_conf, vpn_url, None
 
+def list_users():
+    conf = docker_exec(["cat", CONF_PATH])
+    users, current = [], {}
+    for line in conf.splitlines():
+        line = line.strip()
+        if line == "[Peer]":
+            if current:
+                users.append(current)
+            current = {}
+        elif line.startswith("# "):
+            current["name"] = line[2:]
+        elif line.startswith("PublicKey"):
+            current["pubkey"] = line.split("=", 1)[1].strip()
+        elif line.startswith("AllowedIPs"):
+            current["ip"] = line.split("=", 1)[1].strip()
+    if current:
+        users.append(current)
+    try:
+        awg_show = docker_exec(["awg", "show", "awg0"])
+        active = {l.strip().split("peer:")[1].strip() for l in awg_show.splitlines() if l.strip().startswith("peer:")}
+        for u in users:
+            u["active"] = u.get("pubkey", "") in active
+    except Exception:
+        pass
+    return users
+
+def delete_user(pubkey):
+    subprocess.run(["docker", "exec", CONTAINER, "awg", "set", "awg0", "peer", pubkey, "remove"])
+    conf = docker_exec(["cat", CONF_PATH])
+    lines = conf.splitlines()
+    result, i = [], 0
+    while i < len(lines):
+        line = lines[i]
+        if line.strip() == "[Peer]":
+            block = [line]
+            i += 1
+            while i < len(lines) and lines[i].strip() != "[Peer]":
+                block.append(lines[i])
+                i += 1
+            if not any(pubkey in l for l in block):
+                result.extend(block)
+        else:
+            result.append(line)
+            i += 1
+    subprocess.run(
+        ["docker", "exec", "-i", CONTAINER, "sh", "-c", "cat > %s" % CONF_PATH],
+        input="\n".join(result), text=True)
 
 class Handler(BaseHTTPRequestHandler):
-    def log_message(self, format, *args):
-        pass  # отключаем лишние логи
+    def log_message(self, format, *args): pass
 
-    def send_cors(self):
+    def send_json(self, code, data):
+        body = json.dumps(data).encode()
+        self.send_response(code)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Secret")
-
-    def do_GET(self):
-        if self.path != "/users":
-            self.send_response(404)
-            self.end_headers()
-            return
-
-        secret = self.headers.get("X-Secret", "")
-        if secret != API_SECRET:
-            self.send_response(403)
-            self.send_cors()
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Forbidden"}).encode())
-            return
-
-        conf = docker_exec(["cat", CONF_PATH])
-        users = []
-        current = {}
-        for line in conf.splitlines():
-            line = line.strip()
-            if line == "[Peer]":
-                if current:
-                    users.append(current)
-                current = {}
-            elif line.startswith("# "):
-                current["name"] = line[2:]
-            elif line.startswith("PublicKey"):
-                current["pubkey"] = line.split("=", 1)[1].strip()
-            elif line.startswith("AllowedIPs"):
-                current["ip"] = line.split("=", 1)[1].strip()
-        if current:
-            users.append(current)
-
-        # Get active peers from awg show
-        try:
-            awg_show = docker_exec(["awg", "show", "awg0"])
-            active_keys = set()
-            for l in awg_show.splitlines():
-                if "latest handshake" in l.lower():
-                    pass
-                if l.strip().startswith("peer:"):
-                    active_keys.add(l.strip().split("peer:")[1].strip())
-            for u in users:
-                u["active"] = u.get("pubkey", "") in active_keys
-        except:
-            pass
-
-        self.send_response(200)
-        self.send_cors()
         self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(json.dumps({"users": users}).encode())
+        self.wfile.write(body)
 
-    def do_DELETE(self):
-        if self.path != "/users":
-            self.send_response(404)
-            self.end_headers()
-            return
-
-        secret = self.headers.get("X-Secret", "")
-        if secret != API_SECRET:
-            self.send_response(403)
-            self.send_cors()
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Forbidden"}).encode())
-            return
-
-        length = int(self.headers.get("Content-Length", 0))
-        body = json.loads(self.rfile.read(length))
-        pubkey = body.get("pubkey", "").strip()
-
-        if not pubkey:
-            self.send_response(400)
-            self.send_cors()
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "pubkey required"}).encode())
-            return
-
-        # Remove peer from live WireGuard
-        subprocess.run(["docker", "exec", CONTAINER, "awg", "set", "awg0", "peer", pubkey, "remove"])
-
-        # Remove peer block from config file using awk
-        # Removes the [Peer] block that contains the target pubkey
-        awk_script = f"""
-BEGIN {{ skip=0; buf="" }}
-/^\[Peer\]/ {{
-    if (buf != "") print buf
-    buf = $0
-    skip = 0
-    next
-}}
-/PublicKey/ && $0 ~ /{re.escape(pubkey)}/ {{ skip = 1; buf = ""; next }}
-{{
-    if (!skip) buf = buf "\n" $0
-    else if (/^\[/ && !/^\[Peer\]/) {{ skip = 0; print buf; buf = $0 }}
-}}
-END {{ if (!skip && buf != "") print buf }}
-"""
-        conf = docker_exec(["cat", CONF_PATH])
-        # Simple line-by-line approach
-        lines = conf.split("
-")
-        result = []
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            if line.strip() == "[Peer]":
-                # Collect this peer block
-                block = [line]
-                i += 1
-                while i < len(lines) and (lines[i].strip() == "" or not lines[i].startswith("[")):
-                    block.append(lines[i])
-                    i += 1
-                # Check if this block contains our pubkey
-                if not any(pubkey in l for l in block):
-                    result.extend(block)
-            else:
-                result.append(line)
-                i += 1
-
-        new_conf = "
-".join(result)
-        subprocess.run(
-            ["docker", "exec", "-i", CONTAINER, "sh", "-c", f"cat > {CONF_PATH}"],
-            input=new_conf, text=True
-        )
-
-        self.send_response(200)
-        self.send_cors()
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(json.dumps({"ok": True}).encode())
+    def check_secret(self):
+        return self.headers.get("X-Secret", "") == API_SECRET
 
     def do_OPTIONS(self):
         self.send_response(200)
-        self.send_cors()
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Secret")
         self.end_headers()
+
+    def do_GET(self):
+        if self.path != "/users": return self.send_json(404, {"error": "Not found"})
+        if not self.check_secret(): return self.send_json(403, {"error": "Forbidden"})
+        self.send_json(200, {"users": list_users()})
 
     def do_POST(self):
-        if self.path != "/create":
-            self.send_response(404)
-            self.end_headers()
-            return
-
-        # Проверяем секрет
-        secret = self.headers.get("X-Secret", "")
-        if secret != API_SECRET:
-            self.send_response(403)
-            self.send_cors()
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Forbidden"}).encode())
-            return
-
+        if self.path != "/create": return self.send_json(404, {"error": "Not found"})
+        if not self.check_secret(): return self.send_json(403, {"error": "Forbidden"})
         length = int(self.headers.get("Content-Length", 0))
-        body   = json.loads(self.rfile.read(length))
-        name   = body.get("name", "user").strip() or "user"
-
+        body = json.loads(self.rfile.read(length))
+        name = body.get("name", "user").strip() or "user"
         conf, vpn_url, err = create_user(name)
-
-        self.send_response(200)
-        self.send_cors()
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-
         if err:
-            self.wfile.write(json.dumps({"error": err}).encode())
+            self.send_json(200, {"error": err})
         else:
-            self.wfile.write(json.dumps({"config": conf, "url": vpn_url, "name": name}).encode())
+            self.send_json(200, {"config": conf, "url": vpn_url, "name": name})
 
+    def do_DELETE(self):
+        if self.path != "/users": return self.send_json(404, {"error": "Not found"})
+        if not self.check_secret(): return self.send_json(403, {"error": "Forbidden"})
+        length = int(self.headers.get("Content-Length", 0))
+        body = json.loads(self.rfile.read(length))
+        pubkey = body.get("pubkey", "").strip()
+        if not pubkey: return self.send_json(400, {"error": "pubkey required"})
+        delete_user(pubkey)
+        self.send_json(200, {"ok": True})
 
 if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", 8765), Handler)
