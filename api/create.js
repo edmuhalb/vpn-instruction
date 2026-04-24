@@ -8,7 +8,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Secret": "vpn-secret-2024"
+        "X-Secret": "11111111"
       },
       body: JSON.stringify(req.body)
     });

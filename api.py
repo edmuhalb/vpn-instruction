@@ -12,7 +12,7 @@ SERVER_PORT     = "37930"
 SUBNET          = "10.8.1"
 CONF_PATH       = "/opt/amnezia/awg/awg0.conf"
 CONTAINER       = "amnezia-awg2"
-API_SECRET      = "vpn-secret-2024"   # поменяй на свой
+API_SECRET      = "11111111"   # поменяй на свой
 
 # AmneziaWG параметры (из конфига сервера)
 AWG_PARAMS = {

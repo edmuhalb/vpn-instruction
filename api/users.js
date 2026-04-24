@@ -5,12 +5,12 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const secret = req.headers["x-secret"];
-  if (secret !== "vpn-secret-2024") return res.status(403).json({ error: "Forbidden" });
+  if (secret !== "11111111") return res.status(403).json({ error: "Forbidden" });
 
   try {
     const opts = {
       method: req.method,
-      headers: { "Content-Type": "application/json", "X-Secret": "vpn-secret-2024" }
+      headers: { "Content-Type": "application/json", "X-Secret": "11111111" }
     };
     if (req.method === "DELETE") opts.body = JSON.stringify(req.body);
 
