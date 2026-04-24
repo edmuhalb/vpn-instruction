@@ -227,8 +227,10 @@
     <button class="config-btn" id="getConfigBtn" onclick="getConfig()">Получить</button>
   </div>
   <div class="config-result" id="configResult">
-    <p>✅ Конфигурация готова! Скачайте файл и добавьте его в приложение.</p>
-    <button class="config-download" id="downloadBtn" onclick="downloadConfig()">⬇️ Скачать конфиг</button>
+    <p>✅ Конфигурация готова! Нажмите кнопку чтобы открыть в приложении:</p>
+    <a class="config-download" id="openBtn" href="#">📲 Открыть в AmneziaVPN</a>
+    &nbsp;
+    <button class="config-download" id="downloadBtn" onclick="downloadConfig()">⬇️ Скачать файл</button>
   </div>
   <div class="config-error" id="configError"></div>
 </div>
@@ -465,6 +467,7 @@ async function getConfig() {
     if (data.error) throw new Error(data.error);
     lastConfig = data.config;
     lastName = name;
+    document.getElementById("openBtn").href = data.url;
     result.classList.add("show");
   } catch(e) {
     error.textContent = "Ошибка: " + e.message;

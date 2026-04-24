@@ -120,7 +120,34 @@ Endpoint = {SERVER_IP}:{SERVER_PORT}
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
 """
-    return client_conf, None
+    # Формируем Amnezia URL (vpn://base64(json))
+    import json, base64
+    amnezia_json = {
+        "containers": [{
+            "awg": {
+                "H1": AWG_PARAMS["H1"], "H2": AWG_PARAMS["H2"],
+                "H3": AWG_PARAMS["H3"], "H4": AWG_PARAMS["H4"],
+                "Jc": AWG_PARAMS["Jc"], "Jmin": AWG_PARAMS["Jmin"],
+                "Jmax": AWG_PARAMS["Jmax"],
+                "S1": AWG_PARAMS["S1"], "S2": AWG_PARAMS["S2"],
+                "S3": AWG_PARAMS["S3"], "S4": AWG_PARAMS["S4"],
+                "last_config": client_conf
+            },
+            "container": "amnezia-awg"
+        }],
+        "defaultContainer": "amnezia-awg",
+        "description": f"VPN ({name})",
+        "dns1": "1.1.1.1",
+        "dns2": "8.8.8.8",
+        "hostName": SERVER_IP,
+        "port": SERVER_PORT,
+        "splitTunnelSites": [],
+        "splitTunnelType": 0
+    }
+    encoded = base64.urlsafe_b64encode(json.dumps(amnezia_json).encode()).decode()
+    vpn_url = f"vpn://{encoded}"
+
+    return client_conf, vpn_url, None
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -157,7 +184,7 @@ class Handler(BaseHTTPRequestHandler):
         body   = json.loads(self.rfile.read(length))
         name   = body.get("name", "user").strip() or "user"
 
-        conf, err = create_user(name)
+        conf, vpn_url, err = create_user(name)
 
         self.send_response(200)
         self.send_cors()
@@ -167,7 +194,7 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             self.wfile.write(json.dumps({"error": err}).encode())
         else:
-            self.wfile.write(json.dumps({"config": conf, "name": name}).encode())
+            self.wfile.write(json.dumps({"config": conf, "url": vpn_url, "name": name}).encode())
 
 
 if __name__ == "__main__":
