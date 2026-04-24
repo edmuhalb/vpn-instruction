@@ -191,9 +191,10 @@ function renderUsers(users) {
   `).join("");
 }
 
-function askDelete(pubkey, name) {
-  pendingPubkey = pubkey;
-  document.getElementById("modalText").textContent = `«${name}» потеряет доступ к VPN.`;
+function askDelete(idx) {
+  const u = window._users[idx];
+  pendingPubkey = u.pubkey;
+  document.getElementById("modalText").textContent = `«${u.name || "Пользователь"}» потеряет доступ к VPN.`;
   document.getElementById("modalBg").classList.add("show");
 }
 function closeModal() {

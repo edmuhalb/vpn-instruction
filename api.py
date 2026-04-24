@@ -202,7 +202,7 @@ class Handler(BaseHTTPRequestHandler):
             raw = self.rfile.read(length)
             log("INFO", "DELETE body raw: %s" % raw)
             body = json.loads(raw)
-            pubkey = body.get("pubkey", "").strip()
+            pubkey = (body.get("pubkey") or "").strip()
             if not pubkey: return self.send_json(400, {"error": "pubkey required"})
             log("INFO", "Deleting pubkey: %s" % pubkey)
             delete_user(pubkey)
