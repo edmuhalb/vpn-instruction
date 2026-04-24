@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Как пользоваться VPN</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: #f0f4f8;
+    color: #1a1a2e;
+    padding: 24px 16px 48px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 32px;
+  }
+
+  .tab-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px solid #ddd;
+    background: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+    color: #888;
+  }
+  .tab.active {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #fff;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .card h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    background: #4f46e5;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    min-width: 28px;
+    height: 28px;
+    background: #ede9fe;
+    color: #4f46e5;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .step-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+  }
+  .step-text b { color: #1a1a2e; }
+  .step-text .note {
+    display: block;
+    font-size: 13px;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  .highlight {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #166534;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .highlight::before { content: "✅ "; }
+
+  .warning {
+    background: #fefce8;
+    border: 1.5px solid #fde047;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #713f12;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .warning::before { content: "⚠️ "; }
+
+  .store-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1a1a2e;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 16px 0;
+  }
+
+  .icon { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<h1>📡 Ваш семейный VPN</h1>
+<p class="subtitle">Простая инструкция — всего несколько шагов</p>
+
+<div class="tab-row">
+  <div class="tab active" onclick="showTab('ios')">🍎 iPhone (iOS)</div>
+  <div class="tab" onclick="showTab('android')">🤖 Android</div>
+</div>
+
+<!-- iOS -->
+<div class="section active" id="ios">
+
+  <div class="card">
+    <h2><span class="icon">📲</span> Шаг 1 — Установите приложение</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        Нажмите на эту ссылку с вашего iPhone:<br>
+        <a href="https://apps.apple.com/ru/app/defaultvpn/id6744725017" class="store-btn" style="margin-top:10px;">📲 Открыть в App Store</a>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        Нажмите <b>«Загрузить»</b> и дождитесь установки
+        <span class="note">Приложение бесплатное</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📁</span> Шаг 2 — Добавьте конфигурацию</h2>
+    <p style="font-size:14px;color:#666;margin-bottom:14px;">Вам должны были прислать файл с расширением .conf, QR-код или ссылку</p>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Откройте установленное приложение</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Нажмите <b>«+»</b> или <b>«Добавить сервер»</b></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        Выберите способ добавления:
+        <span class="note">📷 <b>Сканировать QR-код</b> — если прислали картинку<br>📄 <b>Из файла</b> — если прислали файл .conf<br>🔗 <b>Вставить ссылку</b> — если прислали URL</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Нажмите <b>«Добавить»</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🔌</span> Шаг 3 — Включите VPN</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">На главном экране приложения нажмите большую кнопку <b>«Подключить»</b></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        Если появится запрос — нажмите <b>«Разрешить»</b>
+        <span class="note">iOS спрашивает разрешение добавить VPN-профиль — это нормально</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Кнопка станет <b>синей/зелёной</b> — VPN включён ✓</div>
+    </div>
+  </div>
+
+  <div class="highlight">
+    Когда VPN включён — в верхней строке iPhone появится значок <b>«VPN»</b>. Это значит всё работает!
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">❌</span> Как выключить</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Откройте <b>AmneziaVPN</b></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Нажмите ту же кнопку — <b>«Отключить»</b></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Android -->
+<div class="section" id="android">
+
+  <div class="card">
+    <h2><span class="icon">📲</span> Шаг 1 — Установите приложение</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        Нажмите на эту ссылку с вашего телефона:<br>
+        <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.14.5/AmneziaVPN_4.8.14.5_android9+_arm64-v8a.apk" class="store-btn" style="margin-top:10px;">📲 Скачать AmneziaVPN</a>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        Дождитесь окончания загрузки, затем откройте скачанный файл
+        <span class="note">Файл появится в уведомлениях или в папке «Загрузки»</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        Если телефон спросит разрешение на установку — нажмите <b>«Разрешить»</b>
+        <span class="note">Это нормально — приложение устанавливается не через Google Play</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📁</span> Шаг 2 — Добавьте конфигурацию</h2>
+    <p style="font-size:14px;color:#666;margin-bottom:14px;">Вам должны были прислать файл с расширением .conf, QR-код или ссылку</p>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Откройте установленное приложение</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Нажмите <b>«+»</b> или <b>«Добавить сервер»</b></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        Выберите способ добавления:
+        <span class="note">📷 <b>Сканировать QR-код</b> — если прислали картинку<br>📄 <b>Из файла</b> — если прислали файл .conf<br>🔗 <b>Вставить ссылку</b> — если прислали URL</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Нажмите <b>«Добавить»</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🔌</span> Шаг 3 — Включите VPN</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">На главном экране приложения нажмите большую кнопку <b>«Подключить»</b></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        Если появится запрос — нажмите <b>«ОК»</b> или <b>«Разрешить»</b>
+        <span class="note">Android спрашивает разрешение на создание VPN-подключения — это нормально</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Кнопка станет <b>синей/зелёной</b> — VPN включён ✓</div>
+    </div>
+  </div>
+
+  <div class="highlight">
+    Когда VPN включён — в верхней строке Android появится значок ключа 🔑. Это значит всё работает!
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">❌</span> Как выключить</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Откройте <b>AmneziaVPN</b></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Нажмите ту же кнопку — <b>«Отключить»</b></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="card" style="border: 2px solid #e0e7ff;">
+  <h2><span class="icon">💬</span> Частые вопросы</h2>
+  <div class="step">
+    <div class="step-num" style="background:#fef3c7;color:#92400e;">?</div>
+    <div class="step-text">
+      <b>Интернет стал медленнее?</b>
+      <span class="note">Это нормально — VPN добавляет небольшую нагрузку. Если сильно мешает — можно выключить VPN и включить снова когда нужно.</span>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="step">
+    <div class="step-num" style="background:#fef3c7;color:#92400e;">?</div>
+    <div class="step-text">
+      <b>Нужно ли держать VPN всегда включённым?</b>
+      <span class="note">Нет, можно включать только когда нужно. Но можно и не выключать — на заряд батареи влияет минимально.</span>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="step">
+    <div class="step-num" style="background:#fef3c7;color:#92400e;">?</div>
+    <div class="step-text">
+      <b>Что-то перестало работать?</b>
+      <span class="note">Попробуйте выключить VPN и включить снова. Если не помогает — позвоните тому, кто настраивал.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>
