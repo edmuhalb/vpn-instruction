@@ -159,6 +159,59 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Secret")
 
+    def do_GET(self):
+        if self.path != "/users":
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        secret = self.headers.get("X-Secret", "")
+        if secret != API_SECRET:
+            self.send_response(403)
+            self.send_cors()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "Forbidden"}).encode())
+            return
+
+        conf = docker_exec(["cat", CONF_PATH])
+        users = []
+        current = {}
+        for line in conf.splitlines():
+            line = line.strip()
+            if line == "[Peer]":
+                if current:
+                    users.append(current)
+                current = {}
+            elif line.startswith("# "):
+                current["name"] = line[2:]
+            elif line.startswith("PublicKey"):
+                current["pubkey"] = line.split("=", 1)[1].strip()
+            elif line.startswith("AllowedIPs"):
+                current["ip"] = line.split("=", 1)[1].strip()
+        if current:
+            users.append(current)
+
+        # Get active peers from awg show
+        try:
+            awg_show = docker_exec(["awg", "show", "awg0"])
+            active_keys = set()
+            for l in awg_show.splitlines():
+                if "latest handshake" in l.lower():
+                    pass
+                if l.strip().startswith("peer:"):
+                    active_keys.add(l.strip().split("peer:")[1].strip())
+            for u in users:
+                u["active"] = u.get("pubkey", "") in active_keys
+        except:
+            pass
+
+        self.send_response(200)
+        self.send_cors()
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({"users": users}).encode())
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_cors()
